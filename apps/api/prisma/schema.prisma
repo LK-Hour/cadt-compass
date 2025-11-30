@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  studentId     String?   @unique
+  name          String
+  role          Role      @default(STUDENT)
+  passwordHash  String?
+  googleId      String?   @unique
+  picture       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  feedbacks            Feedback[]
+  eventRegistrations   EventRegistration[]
+
+  @@map("users")
+}
+
+
+enum Role {
+  STUDENT
+  STAFF
+  ADMIN
+  GUEST
+}
+
+model Building {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  name          String
+  description   String?
+  latitude      Float
+  longitude     Float
+  floors        Int
+  imageUrl      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  rooms         Room[]
+  pois          POI[]
+
+  @@map("buildings")
+}
+
+model Room {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  name          String
+  buildingId    String
+  building      Building  @relation(fields: [buildingId], references: [id])
+  floor         Int
+  capacity      Int
+  type          RoomType
+  latitude      Float?
+  longitude     Float?
+  description   String?
+  facilities    Json?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([buildingId])
+  @@map("rooms")
+}
+
+enum RoomType {
+  STUDY_ROOM
+  COMPUTER_LAB
+  CLASSROOM
+  LECTURE_HALL
+  MEETING_ROOM
+}
+
+model POI {
+  id            String    @id @default(uuid())
+  name          String
+  type          POIType
+  buildingId    String?
+  building      Building? @relation(fields: [buildingId], references: [id])
+  latitude      Float
+  longitude     Float
+  floor         Int?
+  description   String?
+  icon          String?
+  createdAt     DateTime  @default(now())
+  
+  @@index([type])
+  @@map("pois")
+}
+
+enum POIType {
+  CAFETERIA
+  LIBRARY
+  RECYCLING
+  ATM
+  PARKING
+  ENTRANCE
+  RESTROOM
+  OFFICE
+}
+
+model Event {
+  id                    String    @id @default(uuid())
+  title                 String
+  description           String?
+  type                  EventType
+  startTime             DateTime
+  endTime               DateTime
+  location              String
+  organizer             String
+  imageUrl              String?
+  registrationRequired  Boolean   @default(false)
+  maxParticipants       Int?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  
+  registrations         EventRegistration[]
+  
+  @@index([startTime])
+  @@map("events")
+}
+
+enum EventType {
+  ACADEMIC
+  CLUB
+  WORKSHOP
+  CAREER
+  SOCIAL
+  OFFICIAL
+}
+
+model EventRegistration {
+  id            String    @id @default(uuid())
+  eventId       String
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  registeredAt  DateTime  @default(now())
+  
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@map("event_registrations")
+}
+
+model Feedback {
+  id            String          @id @default(uuid())
+  userId        String
+  user          User            @relation(fields: [userId], references: [id])
+  type          FeedbackType
+  subject       String
+  description   String
+  status        FeedbackStatus  @default(PENDING)
+  location      String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  @@index([status])
+  @@map("feedbacks")
+}
+
+enum FeedbackType {
+  BUG_REPORT
+  MAP_ERROR
+  DATA_INACCURACY
+  FEATURE_REQUEST
+  OTHER
+}
+
+enum FeedbackStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}

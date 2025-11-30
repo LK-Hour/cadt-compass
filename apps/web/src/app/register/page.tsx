@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
@@ -38,7 +39,16 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">🧭 CADT Compass</CardTitle>
+          <div className="flex justify-center mb-4">
+            <Image 
+              src="/logo.png" 
+              alt="CADT Compass Logo" 
+              width={80} 
+              height={80}
+              className="object-contain"
+            />
+          </div>
+          <CardTitle className="text-2xl text-center">CADT Compass</CardTitle>
           <CardDescription className="text-center">Create your account</CardDescription>
         </CardHeader>
         <CardContent>

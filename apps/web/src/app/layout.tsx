@@ -9,6 +9,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "CADT Compass - Smart Campus Navigation",
   description: "Navigate CADT campus with ease. Find buildings, rooms, events, and more.",
+  icons: {
+    icon: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export default function RootLayout({

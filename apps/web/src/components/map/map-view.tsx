@@ -1,26 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import dynamic from 'next/dynamic';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapAPI } from '@/lib/api';
-
-// Dynamically import map components to avoid SSR issues
-const MapContainer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import('react-leaflet').then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import('react-leaflet').then((mod) => mod.Popup),
-  { ssr: false }
-);
 
 interface Building {
   id: string;
@@ -29,7 +11,7 @@ interface Building {
   description?: string;
   latitude: number;
   longitude: number;
-  floors: number;
+  floors?: number;
   _count?: { rooms: number; pois: number };
 }
 
@@ -43,134 +25,168 @@ interface POI {
   building?: { code: string; name: string };
 }
 
+// CADT Campus location in Phnom Penh, Cambodia
+const center = {
+  lat: 11.653714,
+  lng: 104.912045
+};
+
+const containerStyle = {
+  width: '100%',
+  height: '600px'
+};
+
+const mapOptions = {
+  zoomControl: true,
+  streetViewControl: true,
+  mapTypeControl: true,
+  fullscreenControl: true,
+  zoom: 17,
+};
+
 export function MapView() {
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
+  });
+
   const [buildings, setBuildings] = useState<Building[]>([]);
   const [pois, setPois] = useState<POI[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
 
   useEffect(() => {
     async function fetchMapData() {
       try {
-        setLoading(true);
         const [buildingsData, poisData] = await Promise.all([
           mapAPI.getBuildings(),
           mapAPI.getPOIs(),
         ]);
         setBuildings(buildingsData);
         setPois(poisData);
-      } catch (err) {
-        setError('Failed to load map data');
-        console.error('Map data error:', err);
-      } finally {
-        setLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch map data:', error);
       }
     }
-
     fetchMapData();
   }, []);
 
-  if (loading) {
+  const handleNavigate = (lat: number, lng: number, name: string) => {
+    // Open Google Maps with directions (works without API key)
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    window.open(url, '_blank');
+  };
+
+  if (!isLoaded) {
     return (
-      <div className="h-[500px] bg-gray-100 rounded-lg flex items-center justify-center">
+      <div className="w-full h-[600px] flex items-center justify-center bg-gray-100 rounded-lg">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading map...</p>
+          <p className="text-gray-500">Testing Google Maps API Key...</p>
         </div>
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="h-[500px] bg-gray-100 rounded-lg flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // CADT coordinates (approximate)
-  const centerLat = buildings.length > 0 
-    ? buildings.reduce((sum, b) => sum + b.latitude, 0) / buildings.length
-    : 11.5564;
-  const centerLng = buildings.length > 0
-    ? buildings.reduce((sum, b) => sum + b.longitude, 0) / buildings.length
-    : 104.9282;
 
   return (
-    <div className="h-[500px] rounded-lg overflow-hidden shadow-lg">
-      <MapContainer
-        center={[centerLat, centerLng]}
-        zoom={17}
-        style={{ height: '100%', width: '100%' }}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      options={mapOptions}
+    >
+      {/* Building Markers (Red) */}
+      {buildings.map((building) => (
+        <Marker
+          key={building.id}
+          position={{ lat: building.latitude, lng: building.longitude }}
+          onClick={() => setSelectedBuilding(building)}
+          icon={{
+            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+          }}
         />
-        
-        {/* Building Markers */}
-        {buildings.map((building) => (
-          <Marker
-            key={building.id}
-            position={[building.latitude, building.longitude]}
-          >
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-bold text-lg mb-1">
-                  {building.code}: {building.name}
-                </h3>
-                {building.description && (
-                  <p className="text-sm text-gray-600 mb-2">{building.description}</p>
-                )}
-                <div className="text-sm space-y-1">
-                  <p>🏢 Floors: {building.floors}</p>
-                  {building._count && (
-                    <>
-                      <p>🚪 Rooms: {building._count.rooms}</p>
-                      <p>📍 POIs: {building._count.pois}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+      ))}
 
-        {/* POI Markers */}
-        {pois.map((poi) => (
-          <Marker
-            key={poi.id}
-            position={[poi.latitude, poi.longitude]}
-          >
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-bold text-base mb-1">{poi.name}</h3>
-                <p className="text-sm text-gray-600 mb-1">
-                  Type: {poi.type.replace(/_/g, ' ')}
-                </p>
-                {poi.description && (
-                  <p className="text-sm text-gray-700">{poi.description}</p>
-                )}
-                {poi.building && (
-                  <p className="text-xs text-gray-500 mt-2">
-                    📍 {poi.building.name}
-                  </p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
-    </div>
+      {/* POI Markers (Blue) */}
+      {pois.map((poi) => (
+        <Marker
+          key={poi.id}
+          position={{ lat: poi.latitude, lng: poi.longitude }}
+          onClick={() => setSelectedPOI(poi)}
+          icon={{
+            url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+          }}
+        />
+      ))}
+
+      {/* Building Info Window */}
+      {selectedBuilding && (
+        <InfoWindow
+          position={{
+            lat: selectedBuilding.latitude,
+            lng: selectedBuilding.longitude,
+          }}
+          onCloseClick={() => setSelectedBuilding(null)}
+        >
+          <div className="p-2">
+            <h3 className="font-bold text-lg mb-1">
+              {selectedBuilding.code}: {selectedBuilding.name}
+            </h3>
+            {selectedBuilding.description && (
+              <p className="text-sm text-gray-600 mb-2">{selectedBuilding.description}</p>
+            )}
+            {selectedBuilding.floors && (
+              <p className="text-sm text-gray-700 mb-2">Floors: {selectedBuilding.floors}</p>
+            )}
+            <button
+              onClick={() =>
+                handleNavigate(
+                  selectedBuilding.latitude,
+                  selectedBuilding.longitude,
+                  selectedBuilding.name
+                )
+              }
+              className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition-colors w-full"
+            >
+              🧭 Navigate Here
+            </button>
+          </div>
+        </InfoWindow>
+      )}
+
+      {/* POI Info Window */}
+      {selectedPOI && (
+        <InfoWindow
+          position={{
+            lat: selectedPOI.latitude,
+            lng: selectedPOI.longitude,
+          }}
+          onCloseClick={() => setSelectedPOI(null)}
+        >
+          <div className="p-2">
+            <h3 className="font-bold text-lg mb-1">{selectedPOI.name}</h3>
+            <p className="text-sm text-gray-600 mb-2">
+              {selectedPOI.type.replace(/_/g, ' ')}
+            </p>
+            {selectedPOI.building && (
+              <p className="text-sm text-gray-700 mb-2">
+                Location: {selectedPOI.building.name}
+              </p>
+            )}
+            {selectedPOI.description && (
+              <p className="text-sm text-gray-600 mb-2">{selectedPOI.description}</p>
+            )}
+            <button
+              onClick={() =>
+                handleNavigate(selectedPOI.latitude, selectedPOI.longitude, selectedPOI.name)
+              }
+              className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700 transition-colors w-full"
+            >
+              🧭 Navigate Here
+            </button>
+          </div>
+        </InfoWindow>
+      )}
+    </GoogleMap>
   );
 }
+

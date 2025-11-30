@@ -1,4 +1,3 @@
-/* Leaflet CSS - must come before @tailwind directives */
 @import 'leaflet/dist/leaflet.css';
 
 @tailwind base;

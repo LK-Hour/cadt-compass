@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -9,7 +10,14 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <div className="inline-block mb-6">
-            <span className="text-8xl">🧭</span>
+            <Image 
+              src="/logo.png" 
+              alt="CADT Compass Logo" 
+              width={160} 
+              height={160}
+              className="object-contain mx-auto"
+              priority
+            />
           </div>
           <h1 className="text-6xl font-bold text-gray-900 mb-4">
             CADT Compass
@@ -22,13 +30,13 @@ export default function HomePage() {
             discover events, and explore campus facilities.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/login">
-              <Button className="px-8 py-6 text-lg bg-blue-600 hover:bg-blue-700 shadow-lg">
+            <Link href="/dashboard">
+              <Button className="px-6 py-3 text-lg bg-blue-600 hover:bg-blue-700 shadow-lg">
                 Get Started
               </Button>
             </Link>
             <Link href="/register">
-              <Button variant="outline" className="px-8 py-6 text-lg shadow-lg hover:bg-white">
+              <Button variant="outline" className="px-6 py-3 text-lg shadow-lg hover:bg-white">
                 Sign Up
               </Button>
             </Link>

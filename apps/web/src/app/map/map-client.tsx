@@ -1,6 +1,6 @@
 'use client';
 
-import { MapView } from './map-view';
+import { MapView } from '@/components/map/map-view';
 
 export function MapClient() {
   return <MapView />;

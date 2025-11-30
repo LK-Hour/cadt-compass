@@ -1,6 +1,5 @@
-'use client';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapView } from '@/components/map/map-view';
 
 export default function MapPage() {
   return (
@@ -14,18 +13,36 @@ export default function MapPage() {
             <CardTitle>🗺️ Interactive Map</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg p-12 text-center">
-              <div className="text-6xl mb-4">🗺️</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Map Coming Soon!</h2>
-              <p className="text-gray-700">
-                Interactive campus map with building navigation will be available here.
-              </p>
-              <p className="text-sm text-gray-600 mt-4">
-                Features: Building markers, room search, POIs, turn-by-turn navigation
-              </p>
-            </div>
+            <MapView />
           </CardContent>
         </Card>
+
+        <div className="mt-8 grid md:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">🏢 Buildings</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Explore campus buildings and facilities</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">📍 Points of Interest</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Find cafeterias, libraries, and more</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">🔍 Search</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600">Quick search for any location</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

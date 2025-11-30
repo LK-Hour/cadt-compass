@@ -54,6 +54,35 @@ export const poisAPI = {
     apiClient.get<POI[]>('/pois'),
 };
 
+// Map API (combined)
+export const mapAPI = {
+  getBuildings: async () => {
+    const response = await apiClient.get<Building[]>('/map/buildings');
+    return response.data;
+  },
+  
+  getPOIs: async (type?: string) => {
+    const response = await apiClient.get<POI[]>('/map/pois', {
+      params: type ? { type } : {},
+    });
+    return response.data;
+  },
+  
+  getRooms: async (buildingId?: string) => {
+    const response = await apiClient.get<Room[]>('/map/rooms', {
+      params: buildingId ? { buildingId } : {},
+    });
+    return response.data;
+  },
+  
+  search: async (query: string) => {
+    const response = await apiClient.get('/map/search', {
+      params: { q: query },
+    });
+    return response.data;
+  },
+};
+
 // Availability API
 export const availabilityAPI = {
   getAll: () =>

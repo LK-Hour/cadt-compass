@@ -6,6 +6,9 @@ import { PrismaModule } from './modules/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BuildingsModule } from './modules/buildings/buildings.module';
 import { AvailabilityModule } from './modules/availability/availability.module';
+import { EventsModule } from './modules/events/events.module';
+import { MapModule } from './modules/map/map.module';
+import { FeedbackModule } from './modules/feedback/feedback.module';
 import configuration from './config/configuration';
 
 @Module({
@@ -19,6 +22,9 @@ import configuration from './config/configuration';
     AuthModule,
     BuildingsModule,
     AvailabilityModule,
+    EventsModule,
+    MapModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [AppService],

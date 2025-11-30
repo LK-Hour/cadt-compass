@@ -84,8 +84,13 @@ export interface Event {
   endTime: string;
   location: string;
   type: EventType;
-  organizerId: string;
+  organizer: string;
+  organizerId?: string;
   attendeeCount?: number;
+  maxParticipants?: number;
+  registrationRequired?: boolean;
+  imageUrl?: string;
+  _count?: { registrations: number };
   createdAt: string;
   updatedAt: string;
 }

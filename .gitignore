@@ -52,3 +52,5 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+GOOGLE_OAUTH_IMPLEMENTATION.md

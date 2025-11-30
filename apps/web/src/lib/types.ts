@@ -117,9 +117,24 @@ export interface Feedback {
 
 export interface RoomAvailability {
   roomId: string;
+  name: string;
+  building: string;
+  floor: number;
+  capacity: number;
+  type: string;
   available: boolean;
+  currentBooking?: {
+    user: string;
+    startTime: string;
+    endTime: string;
+    purpose: string;
+  };
+  nextBooking?: {
+    startTime: string;
+    endTime: string;
+  };
+  nextAvailable?: string;
   currentOccupancy?: number;
-  nextAvailableTime?: string;
   room?: Room;
 }
 

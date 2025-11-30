@@ -52,9 +52,10 @@ export class AuthController {
   async googleCallback(@Req() req: any, @Res() res: Response) {
     const authData = await this.authService.googleLogin(req.user);
     
-    // Redirect to frontend with token
+    // Redirect to frontend with token and user data
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    res.redirect(`${frontendUrl}/auth/callback?token=${authData.access_token}`);
+    const userData = encodeURIComponent(JSON.stringify(authData.user));
+    res.redirect(`${frontendUrl}/auth/callback?token=${authData.access_token}&user=${userData}`);
   }
 
   @Get('me')

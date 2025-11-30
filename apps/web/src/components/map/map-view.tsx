@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapAPI } from '@/lib/api';
+import { Building2, MapPin, Navigation, Layers, X } from 'lucide-react';
 
 interface Building {
   id: string;
@@ -42,6 +43,27 @@ const mapOptions = {
   mapTypeControl: true,
   fullscreenControl: true,
   zoom: 17,
+};
+
+// Custom marker icons
+const buildingMarkerIcon = {
+  path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+  fillColor: '#3b82f6',
+  fillOpacity: 1,
+  strokeColor: '#1e40af',
+  strokeWeight: 2,
+  scale: 1.8,
+  anchor: new google.maps.Point(12, 24),
+};
+
+const poiMarkerIcon = {
+  path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+  fillColor: '#a855f7',
+  fillOpacity: 1,
+  strokeColor: '#7e22ce',
+  strokeWeight: 2,
+  scale: 1.8,
+  anchor: new google.maps.Point(12, 24),
 };
 
 export function MapView() {
@@ -94,27 +116,25 @@ export function MapView() {
       center={center}
       options={mapOptions}
     >
-      {/* Building Markers (Red) */}
+      {/* Building Markers */}
       {buildings.map((building) => (
         <Marker
           key={building.id}
           position={{ lat: building.latitude, lng: building.longitude }}
           onClick={() => setSelectedBuilding(building)}
-          icon={{
-            url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-          }}
+          icon={buildingMarkerIcon}
+          animation={selectedBuilding?.id === building.id ? google.maps.Animation.BOUNCE : undefined}
         />
       ))}
 
-      {/* POI Markers (Blue) */}
+      {/* POI Markers */}
       {pois.map((poi) => (
         <Marker
           key={poi.id}
           position={{ lat: poi.latitude, lng: poi.longitude }}
           onClick={() => setSelectedPOI(poi)}
-          icon={{
-            url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-          }}
+          icon={poiMarkerIcon}
+          animation={selectedPOI?.id === poi.id ? google.maps.Animation.BOUNCE : undefined}
         />
       ))}
 
@@ -127,16 +147,39 @@ export function MapView() {
           }}
           onCloseClick={() => setSelectedBuilding(null)}
         >
-          <div className="p-2">
-            <h3 className="font-bold text-lg mb-1">
-              {selectedBuilding.code}: {selectedBuilding.name}
-            </h3>
+          <div className="p-4 min-w-[280px]">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-xl shadow-md">
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg text-gray-900 leading-tight">
+                  {selectedBuilding.code}
+                </h3>
+                <p className="text-sm text-gray-600 font-medium">{selectedBuilding.name}</p>
+              </div>
+            </div>
             {selectedBuilding.description && (
-              <p className="text-sm text-gray-600 mb-2">{selectedBuilding.description}</p>
+              <p className="text-sm text-gray-600 mb-3 leading-relaxed">{selectedBuilding.description}</p>
             )}
-            {selectedBuilding.floors && (
-              <p className="text-sm text-gray-700 mb-2">Floors: {selectedBuilding.floors}</p>
-            )}
+            <div className="space-y-2 mb-4">
+              {selectedBuilding.floors && (
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="bg-blue-50 p-1.5 rounded-lg">
+                    <Layers className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">{selectedBuilding.floors} floors</span>
+                </div>
+              )}
+              {selectedBuilding._count && (
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="bg-green-50 p-1.5 rounded-lg">
+                    <MapPin className="w-4 h-4 text-green-600" />
+                  </div>
+                  <span className="text-gray-700 font-medium">{selectedBuilding._count.rooms} rooms, {selectedBuilding._count.pois} POIs</span>
+                </div>
+              )}
+            </div>
             <button
               onClick={() =>
                 handleNavigate(
@@ -145,9 +188,10 @@ export function MapView() {
                   selectedBuilding.name
                 )
               }
-              className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition-colors w-full"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
             >
-              🧭 Navigate Here
+              <Navigation className="w-4 h-4" />
+              <span>Get Directions</span>
             </button>
           </div>
         </InfoWindow>
@@ -162,26 +206,35 @@ export function MapView() {
           }}
           onCloseClick={() => setSelectedPOI(null)}
         >
-          <div className="p-2">
-            <h3 className="font-bold text-lg mb-1">{selectedPOI.name}</h3>
-            <p className="text-sm text-gray-600 mb-2">
-              {selectedPOI.type.replace(/_/g, ' ')}
-            </p>
+          <div className="p-4 min-w-[280px]">
+            <div className="flex items-start gap-3 mb-3">
+              <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-2.5 rounded-xl shadow-md">
+                <MapPin className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-lg text-gray-900 leading-tight">{selectedPOI.name}</h3>
+                <span className="inline-block px-2 py-1 bg-purple-50 text-purple-700 text-xs font-semibold rounded-lg mt-1">
+                  {selectedPOI.type.replace(/_/g, ' ')}
+                </span>
+              </div>
+            </div>
             {selectedPOI.building && (
-              <p className="text-sm text-gray-700 mb-2">
-                Location: {selectedPOI.building.name}
-              </p>
+              <div className="flex items-center gap-2 text-sm mb-3 bg-blue-50 p-2.5 rounded-lg">
+                <Building2 className="w-4 h-4 text-blue-600" />
+                <span className="text-gray-700 font-medium">{selectedPOI.building.name}</span>
+              </div>
             )}
             {selectedPOI.description && (
-              <p className="text-sm text-gray-600 mb-2">{selectedPOI.description}</p>
+              <p className="text-sm text-gray-600 mb-4 leading-relaxed">{selectedPOI.description}</p>
             )}
             <button
               onClick={() =>
                 handleNavigate(selectedPOI.latitude, selectedPOI.longitude, selectedPOI.name)
               }
-              className="bg-purple-600 text-white px-4 py-2 rounded text-sm hover:bg-purple-700 transition-colors w-full"
+              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-all w-full flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
             >
-              🧭 Navigate Here
+              <Navigation className="w-4 h-4" />
+              <span>Get Directions</span>
             </button>
           </div>
         </InfoWindow>

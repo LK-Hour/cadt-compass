@@ -86,7 +86,7 @@ export const mapAPI = {
 // Availability API
 export const availabilityAPI = {
   getAll: () =>
-    apiClient.get<RoomAvailability[]>('/availability'),
+    apiClient.get<{ rooms: RoomAvailability[]; lastUpdated: string }>('/availability'),
   
   getByRoomId: (roomId: string) =>
     apiClient.get<RoomAvailability>(`/availability/${roomId}`),

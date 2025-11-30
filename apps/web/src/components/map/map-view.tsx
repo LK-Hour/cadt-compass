@@ -22,7 +22,7 @@ const Popup = dynamic(
   { ssr: false }
 );
 
-interface MapBuilding {
+interface Building {
   id: string;
   code: string;
   name: string;
@@ -33,7 +33,7 @@ interface MapBuilding {
   _count?: { rooms: number; pois: number };
 }
 
-interface MapPOI {
+interface POI {
   id: string;
   name: string;
   type: string;
@@ -44,8 +44,8 @@ interface MapPOI {
 }
 
 export function MapView() {
-  const [buildings, setBuildings] = useState<MapBuilding[]>([]);
-  const [pois, setPois] = useState<MapPOI[]>([]);
+  const [buildings, setBuildings] = useState<Building[]>([]);
+  const [pois, setPois] = useState<POI[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,8 +57,8 @@ export function MapView() {
           mapAPI.getBuildings(),
           mapAPI.getPOIs(),
         ]);
-        setBuildings(buildingsData as MapBuilding[]);
-        setPois(poisData as MapPOI[]);
+        setBuildings(buildingsData);
+        setPois(poisData);
       } catch (err) {
         setError('Failed to load map data');
         console.error('Map data error:', err);

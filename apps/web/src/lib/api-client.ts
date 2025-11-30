@@ -22,10 +22,19 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only redirect to login for 401 errors on protected routes
+    // Allow guest access to public endpoints
     if (error.response?.status === 401) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      const url = error.config?.url || '';
+      const protectedEndpoints = ['/auth/me', '/profile', '/feedback'];
+      const isProtectedRoute = protectedEndpoints.some(endpoint => url.includes(endpoint));
+      
+      if (isProtectedRoute) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
+        // Don't auto-redirect, let the user stay on the page
+        console.warn('Authentication required for this action. Please sign in.');
+      }
     }
     return Promise.reject(error);
   }

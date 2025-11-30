@@ -2,29 +2,19 @@
 
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuthStore } from '@/stores/authStore';
 
 export default function DashboardPage() {
-  const user = { name: 'Student', role: 'STUDENT' }; // Mock user
-  const isAdmin = user.role === 'ADMIN';
+  const { user } = useAuthStore();
+  const isAdmin = user?.role === 'ADMIN';
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="text-2xl font-bold text-gray-900">
-              🧭 CADT Compass
-            </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-700">Welcome, {user.name}!</span>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p className="text-gray-600 mb-8">Quick access to campus features</p>
+        <p className="text-gray-600 mb-8">
+          {user ? 'Quick access to campus features' : 'Explore campus features - Sign in for personalized experience'}
+        </p>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <QuickAccessCard
@@ -50,9 +40,9 @@ export default function DashboardPage() {
           />
           <QuickAccessCard
             icon="👤"
-            title="Profile"
-            description="Manage your account"
-            href="/profile"
+            title={user ? "Profile" : "Sign In"}
+            description={user ? "Manage your account" : "Login for more features"}
+            href={user ? "/profile" : "/login"}
             color="bg-orange-500"
           />
         </div>

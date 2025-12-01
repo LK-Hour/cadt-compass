@@ -1,5 +1,0 @@
-{
-  "buildCommand": "npm run build --workspace=@cadt-compass/web --workspace=@cadt-compass/types",
-  "installCommand": "npm install",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
-}
